@@ -8,36 +8,40 @@ This paper introduces a novel conjecture in the field of number theory, suggesti
 
 Prime numbers, the building blocks of natural numbers, have been extensively studied for their inherent properties and the mysteries surrounding their distribution. Beyond classical results and conjectures such as the Goldbach Conjecture, researchers continuously seek new relationships and patterns among primes. This paper proposes a new conjecture, which posits that any prime number greater than 3 serves as the arithmetic mean of at least one pair of distinct primes. This conjecture not only adds to the rich tapestry of number theory but also encourages deeper analysis into the symmetrical properties of primes.
 
-## Conjecture
+# Conjecture
 
-For any prime number \( p \) greater than 3, there exist at least two distinct prime numbers \( p_1 \) and \( p_2 \) such that:
+For any prime number $p$ greater than 3, there exist at least two distinct prime numbers $p_1$ and $p_2$ such that:
 
-\[
+$$
 p = \frac{p_1 + p_2}{2}
-\]
+$$
 
 This formulation suggests a symmetric relationship around prime numbers, indicating a kind of "prime balance" that has not been previously documented in the literature.
 
-## Detailed Examination and Examples
+# Detailed Examination and Examples
 
 To illustrate and support the conjecture, various examples across different magnitudes of prime numbers are provided. In each case, we determine two distinct primes that sum to twice the target prime, thereby satisfying the condition:
 
-\[
+$$
 p_1 + p_2 = 2p
-\]
+$$
 
-- **Small Primes:**
-  - **5:** Here, \(2 \times 5 = 10\). The prime pair \((3, 7)\) satisfies \(3 + 7 = 10\), so \(5 = \frac{3 + 7}{2}\).
-  - **11:** For \(2 \times 11 = 22\), the prime pair \((3, 19)\) satisfies \(3 + 19 = 22\), hence \(11 = \frac{3 + 19}{2}\).
+## Small Primes
 
-- **Medium-sized Primes:**
-  - **103:** With \(2 \times 103 = 206\), the prime pair \((79, 127)\) satisfies \(79 + 127 = 206\), yielding \(103 = \frac{79 + 127}{2}\).
+- **5**: Here, $2 \times 5 = 10$. The prime pair $(3, 7)$ satisfies $3 + 7 = 10$, so $5 = \frac{3 + 7}{2}$.
+- **11**: For $2 \times 11 = 22$, the prime pair $(3, 19)$ satisfies $3 + 19 = 22$, hence $11 = \frac{3 + 19}{2}$.
 
-- **Four-digit Prime:**
-  - **1,061:** Here, \(2 \times 1,061 = 2,122\). The pair \((251, 1,871)\) satisfies \(251 + 1,871 = 2,122\), resulting in \(1,061 = \frac{251 + 1,871}{2}\).
+## Medium-sized Primes
 
-- **Five-digit Prime:**
-  - **30,011:** For \(2 \times 30,011 = 60,022\), the prime pair \((22,511, 37,511)\) satisfies \(22,511 + 37,511 = 60,022\), so \(30,011 = \frac{22,511 + 37,511}{2}\).
+- **103**: With $2 \times 103 = 206$, the prime pair $(79, 127)$ satisfies $79 + 127 = 206$, yielding $103 = \frac{79 + 127}{2}$.
+
+## Four-digit Prime
+
+- **1,061**: Here, $2 \times 1,061 = 2,122$. The pair $(251, 1,871)$ satisfies $251 + 1,871 = 2,122$, resulting in $1,061 = \frac{251 + 1,871}{2}$.
+
+## Five-digit Prime
+
+- **30,011**: For $2 \times 30,011 = 60,022$, the prime pair $(22,511, 37,511)$ satisfies $22,511 + 37,511 = 60,022$, so $30,011 = \frac{22,511 + 37,511}{2}$.
 
 These examples demonstrate the systematic process of identifying two prime numbers—one smaller and one larger than the target—whose sum is exactly twice the target prime. This method validates the conjecture across a wide range of prime magnitudes.
 
