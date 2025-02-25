@@ -1,127 +1,75 @@
-import random
-import math
+import tkinter as tk
+from tkinter import ttk, messagebox
+import sympy
 
-def generate_prime(n):
-    """
-    Generates a random n-digit prime number.
 
-    Args:
-        n: The number of digits in the desired prime number.
+def generate_n_digit_prime(n):
+    """Generate an n-digit prime number."""
+    if n >= 25:
+        raise ValueError("n must be less than 25")
+    return sympy.randprime(10 ** (n - 1), 10 ** n)
 
-    Returns:
-        An n-digit prime number, or None if n is invalid.
-    """
-    if not (1 <= n <= 25):
-        return None
 
-    lower_bound = 10**(n - 1)
-    upper_bound = 10**n - 1
+def find_prime_pairs(p):
+    """Find the first pair of distinct primes that average to p."""
+    pairs = []
+    for prime1 in sympy.primerange(2, 2 * p):
+        prime2 = 2 * p - prime1
+        if prime2 > prime1 and sympy.isprime(prime2):
+            pairs.append((prime1, prime2))
+            break
+    return pairs
 
-    while True:
-        num = random.randint(lower_bound, upper_bound)
-        if is_prime(num):
-            return num
 
-def is_prime(num):
-    """
-    Checks if a number is prime.
+class PrimeGUI:
+    def __init__(self, master):
+        self.master = master
+        master.title("Mean Relations Among Primes")
 
-    Args:
-        num: The number to check.
+        # Create a frame for input
+        input_frame = ttk.Frame(master, padding="10")
+        input_frame.grid(row=0, column=0, sticky="W")
 
-    Returns:
-        True if num is prime, False otherwise.
-    """
-    if num <= 1:
-        return False
-    if num <= 3:
-        return True
-    if num % 2 == 0 or num % 3 == 0:
-        return False
-    i = 5
-    while i * i <= num:
-        if num % i == 0 or num % (i + 2) == 0:
-            return False
-        i += 6
-    return True
+        # Label and Entry for number of digits
+        self.label = ttk.Label(input_frame, text="Enter number of digits (n < 25):")
+        self.label.grid(row=0, column=0, padx=5, pady=5)
 
-def represent_as_average_of_primes(prime, k):
-    """
-    Tries to represent a prime number as an average of k prime numbers (excluding the prime itself).
+        self.entry = ttk.Entry(input_frame, width=10)
+        self.entry.grid(row=0, column=1, padx=5, pady=5)
 
-    Args:
-        prime: The prime number to represent.
-        k: The number of prime numbers to average (k > 1).
+        # Button to generate prime and find pairs
+        self.generate_button = ttk.Button(input_frame, text="Generate Prime", command=self.generate_prime)
+        self.generate_button.grid(row=1, column=0, columnspan=2, pady=10)
 
-    Returns:
-        A list of k prime numbers whose average is close to the prime number, or None if not found.
-    """
-    if k <= 1:
-        print("k must be greater than 1.")
-        return None
+        # Text widget to display output
+        self.output_text = tk.Text(master, wrap="word", width=60, height=15, padx=10, pady=10)
+        self.output_text.grid(row=1, column=0)
 
-    # Calculate the target sum
-    target_sum = prime * k
-
-    max_attempts = 10000
-
-    for _ in range(max_attempts):
-        # Generate k-1 random prime numbers (excluding the prime itself)
-        primes = []
-        for _ in range(k - 1):
-            while True:
-                num = random.randint(2, int(target_sum/2))
-                if is_prime(num) and num != prime:
-                    primes.append(num)
-                    break
-
-        # Calculate the last prime number needed
-        last_prime_needed = target_sum - sum(primes)
-
-        if is_prime(last_prime_needed) and last_prime_needed != prime:
-            primes.append(last_prime_needed)
-
-            # Check if the average is close to the prime
-            average = sum(primes) / k
-            if math.isclose(average, prime, rel_tol=1e-09):
-                return primes
-
-    return None
-
-def main():
-    """
-    Main function to interact with the user.
-    """
-    while True:
+    def generate_prime(self):
+        # Clear the output area
+        self.output_text.delete("1.0", tk.END)
         try:
-            n = int(input("Enter the desired number of digits for the prime number (1-25): "))
-            if 1 <= n <= 25:
-                break
+            n = int(self.entry.get())
+            if n < 1:
+                raise ValueError("Number of digits must be positive.")
+            # Generate an n-digit prime number
+            p = generate_n_digit_prime(n)
+            self.output_text.insert(tk.END, f"Generated {n}-digit prime: {p}\n\n")
+
+            # Find prime pairs that average to p
+            pairs = find_prime_pairs(p)
+            if pairs:
+                self.output_text.insert(tk.END,
+                                        "Found pairs of distinct primes whose average equals the generated prime:\n")
+                for (p1, p2) in pairs:
+                    self.output_text.insert(tk.END, f"{p1} and {p2}\n")
             else:
-                print("Invalid input. Please enter a number between 1 and 25.")
-        except ValueError:
-            print("Invalid input. Please enter an integer.")
+                self.output_text.insert(tk.END, "No prime pairs found.")
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
 
-    prime = generate_prime(n)
-    print(f"Generated {n}-digit prime number: {prime}")
-
-    while True:
-        try:
-            k = int(input("Enter the number of primes to average (k > 1): "))
-            if k > 1:
-                break
-            else:
-                print("k must be greater than 1.")
-        except ValueError:
-            print("Invalid input. Please enter an integer greater than 1.")
-
-    result = represent_as_average_of_primes(prime, k)
-    if result:
-        print(f"The prime number {prime} can be approximately represented as the average of these {k} prime numbers:")
-        print(result)
-        print(f"Their average is: {sum(result)/k}")
-    else:
-        print(f"Could not find {k} prime numbers (excluding {prime}) whose average is close to {prime}.")
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    gui = PrimeGUI(root)
+    root.mainloop()
