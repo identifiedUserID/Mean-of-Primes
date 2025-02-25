@@ -71,14 +71,18 @@ class PrimeGUI:
         mode_frame.pack(fill=tk.X, padx=5, pady=5)
 
         self.mode_var = tk.StringVar(value="random")
-        self.radio_random = ttk.Radiobutton(mode_frame, text="Generate Random Prime",
-                                            variable=self.mode_var, value="random",
-                                            command=self.toggle_input_fields)
+        self.radio_random = ttk.Radiobutton(
+            mode_frame, text="Generate Random Prime",
+            variable=self.mode_var, value="random",
+            command=self.toggle_input_fields
+        )
         self.radio_random.pack(side=tk.LEFT, padx=5)
 
-        self.radio_user = ttk.Radiobutton(mode_frame, text="Use Provided Prime",
-                                          variable=self.mode_var, value="user",
-                                          command=self.toggle_input_fields)
+        self.radio_user = ttk.Radiobutton(
+            mode_frame, text="Use Provided Prime",
+            variable=self.mode_var, value="user",
+            command=self.toggle_input_fields
+        )
         self.radio_user.pack(side=tk.LEFT, padx=5)
 
         # --------------------------
@@ -87,14 +91,14 @@ class PrimeGUI:
         self.input_frame = ttk.Frame(self.main_frame, style="InputFrame.TFrame", padding="10")
         self.input_frame.pack(fill=tk.X, padx=5, pady=5)
 
-        # 1) Entry for number of digits
+        # 1) Label & Entry for number of digits
         self.label_digits = ttk.Label(self.input_frame, text="Number of digits (n < 25):")
         self.label_digits.grid(row=0, column=0, padx=5, pady=5, sticky="W")
 
         self.entry_digits = ttk.Entry(self.input_frame, width=10)
         self.entry_digits.grid(row=0, column=1, padx=5, pady=5, sticky="W")
 
-        # 2) Entry for user-provided prime
+        # 2) Label & Entry for user-provided prime
         self.label_user_prime = ttk.Label(self.input_frame, text="Enter a prime number:")
         self.label_user_prime.grid(row=1, column=0, padx=5, pady=5, sticky="W")
 
@@ -123,18 +127,29 @@ class PrimeGUI:
                                    font=("Helvetica", 10))
         self.output_text.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
-        # Initialize fields
+        # Configure text tags for bold text
+        self.output_text.tag_config("bold", font=("Helvetica", 10, "bold"))
+
+        # Initialize fields based on default mode
         self.toggle_input_fields()
 
     def toggle_input_fields(self):
-        """Enable or disable entry widgets based on the selected mode."""
+        """Hide or show the appropriate input fields based on the selected mode."""
         mode = self.mode_var.get()
         if mode == "random":
-            self.entry_digits.config(state="normal")
-            self.entry_user_prime.config(state="disabled")
-        else:  # user-provided prime
-            self.entry_digits.config(state="disabled")
-            self.entry_user_prime.config(state="normal")
+            # Show digits row
+            self.label_digits.grid()
+            self.entry_digits.grid()
+            # Hide user prime row
+            self.label_user_prime.grid_remove()
+            self.entry_user_prime.grid_remove()
+        else:
+            # Hide digits row
+            self.label_digits.grid_remove()
+            self.entry_digits.grid_remove()
+            # Show user prime row
+            self.label_user_prime.grid()
+            self.entry_user_prime.grid()
 
     def process_input(self):
         """Handle both modes: random prime generation or user-provided prime."""
@@ -174,7 +189,6 @@ class PrimeGUI:
 
             # Find the nearest prime if num is not prime
             p = nearest_prime(num)
-            # Display results (we don't have a 'digit count' for user prime, so pass None)
             self.display_results(p, None)
         except ValueError as ve:
             messagebox.showerror("Input Error", str(ve))
@@ -183,35 +197,54 @@ class PrimeGUI:
 
     def display_results(self, p, n):
         """Given a prime p, find the pair of primes whose average is p and display output."""
+        # Format p with commas
+        p_formatted = format(p, ",")
+
         if n is not None:
-            self.output_text.insert(tk.END, f"Generated {n}-digit prime: {p}\n\n")
+            # Bold line with the prime and digit count
+            self.output_text.insert(
+                tk.END,
+                f"Generated {n}-digit prime: {p_formatted}\n\n",
+                "bold"
+            )
         else:
-            self.output_text.insert(tk.END, f"Selected prime: {p}\n\n")
+            # Bold line for user-provided (or nearest) prime
+            self.output_text.insert(
+                tk.END,
+                f"Selected prime: {p_formatted}\n\n",
+                "bold"
+            )
 
         # Find prime pairs that average to p
         pairs = find_prime_pairs(p)
         if pairs:
             p1, p2 = pairs[0]
-            self.output_text.insert(tk.END,
-                "Found a combination of distinct primes whose average equals the prime:\n\n")
-            self.output_text.insert(tk.END, f"Pair: {p1} and {p2}\n\n")
+            # Format them with commas
+            p1_formatted = format(p1, ",")
+            p2_formatted = format(p2, ",")
 
-            # Display the proof in the requested format
-            self.output_text.insert(tk.END, "Proof:\n\n")
-            self.output_text.insert(tk.END,
-                f"Generated/Selected Prime times number of Discovered Primes: {p} x 2 = {2*p}\n")
-            self.output_text.insert(tk.END,
-                f"Sum of Discovered Primes: {p1} + {p2} = {p1 + p2}\n\n")
+            # Bold line for the pair
+            self.output_text.insert(
+                tk.END,
+                "Found a combination of distinct primes whose average equals the prime:\n\n"
+                f"Pair: {p1_formatted} and {p2_formatted}\n\n",
+                "bold"
+            )
 
-            # Use Unicode subscript characters for p1, p2
-            self.output_text.insert(tk.END,
+            # Display the proof in the requested format (normal text)
+            self.output_text.insert(
+                tk.END,
+                "Proof:\n\n"
+                f"Generated/Selected Prime times number of Discovered Primes: {p_formatted} x 2 = {format(2*p, ',')}\n"
+                f"Sum of Discovered Primes: {p1_formatted} + {p2_formatted} = {format(p1 + p2, ',')}\n\n"
                 "This matches the expected relation: p\u2081 + p\u2082 = n \u00D7 p,\n"
                 "where p\u2081, p\u2082, ..., p\u2099 are discovered primes and p is the generated/selected prime, "
-                "and n is the number of discovered primes.\n\n")
+                "and n is the number of discovered primes.\n\n"
+            )
         else:
             self.output_text.insert(tk.END, "No prime pairs found.\n")
 
-
+# Run the application
 if __name__ == "__main__":
     root = tk.Tk()
     gui = PrimeGUI(root)
