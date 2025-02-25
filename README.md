@@ -45,6 +45,10 @@ $$
 
 These examples demonstrate the systematic process of identifying two prime numbers—one smaller and one larger than the target—whose sum is exactly twice the target prime. This method validates the conjecture across a wide range of prime magnitudes.
 
+## Project Video
+
+[![Watch the video](https://img.youtube.com/vi/LanqOKW7vic/0.jpg)](https://www.youtube.com/watch?v=LanqOKW7vic)
+
 ## Code Overview
 
 The complete source code is available in the repository. Below are the main functions with explanations of their roles:
