@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prime Number Explorer</title>
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-light: #818cf8;
+      --primary-dark: #4f46e5;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: var(--gray-100);
+      color: var(--gray-900);
+      line-height: 1.6;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      margin-top: 20px;
+      margin-bottom: 40px;
+    }
+    
+    h1 {
+      text-align: center;
+      color: var(--primary-dark);
+      margin-bottom: 24px;
+      font-size: 2.2rem;
+    }
+    
+    .section {
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    h2 {
+      color: var(--primary);
+      margin-bottom: 16px;
+      font-size: 1.5rem;
+    }
+    
+    .input-group {
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    label {
+      font-weight: 600;
+      margin-right: 8px;
+      flex-basis: 180px;
+    }
+    
+    input[type="number"],
+    input[type="text"] {
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 2px solid var(--gray-300);
+      font-size: 1rem;
+      flex: 1;
+      min-width: 100px;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    button:disabled {
+      background-color: var(--gray-300);
+      cursor: not-allowed;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .alert {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    
+    .alert-warning {
+      background-color: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .alert-error {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .result-box {
+      background-color: var(--gray-100);
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+    }
+    
+    .result-title {
+      font-weight: 600;
+      color: var(--primary-dark);
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+    
+    .result-content {
+      margin-bottom: 12px;
+    }
+    
+    .result-value {
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 600;
+      color: var(--primary);
+      word-break: break-all;
+    }
+    
+    .proof-box {
+      background-color: var(--gray-200);
+      border-radius: 6px;
+      padding: 16px;
+      margin-top: 16px;
+      display: none;
+    }
+    
+    .toggle-proof-btn {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 6px 12px;
+      margin-top: 8px;
+    }
+    
+    .toggle-proof-btn:hover {
+      background-color: rgba(99, 102, 241, 0.1);
+    }
+    
+    .loader {
+      display: none;
+      width: 24px;
+      height: 24px;
+      border: 3px solid var(--gray-300);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    /* Slider styles */
+    .slider-container {
+      width: 100%;
+      margin: 16px 0;
+    }
+    
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: var(--gray-300);
+      outline: none;
+    }
+    
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .slider::-webkit-slider-thumb:hover {
+      background: var(--primary-dark);
+    }
+    
+    .slider::-moz-range-thumb:hover {
+      background: var(--primary-dark);
+    }
+    
+    .slider-value {
+      font-weight: 600;
+      color: var(--primary);
+      margin-left: 10px;
+    }
+    
+    .switch-btn {
+      background-color: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      padding: 6px 12px;
+      margin-left: 10px;
+    }
+    
+    /* History table styles */
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    .history-table th,
+    .history-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .history-table th {
+      background-color: var(--primary-light);
+      color: white;
+      font-weight: 600;
+    }
+    
+    .history-table tbody tr {
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .history-table tbody tr:hover {
+      background-color: rgba(99, 102, 241, 0.05);
+    }
+    
+    .history-table tr.selected {
+      background-color: rgba(99, 102, 241, 0.1);
+    }
+    
+    /* Animation for equation */
+    .equation-container {
+      margin-top: 20px;
+      padding: 16px;
+      background-color: var(--gray-100);
+      border-radius: 6px;
+      text-align: center;
+      overflow: hidden;
+      height: 0;
+      transition: height 0.3s ease-out;
+    }
+    
+    .equation-container.visible {
+      height: auto;
+      min-height: 80px;
+    }
+    
+    .equation {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.2rem;
+      color: var(--primary-dark);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .equation.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: var(--gray-800);
+      font-style: italic;
+    }
+    
+    .primes-list {
+      padding: 0;
+      margin: 0;
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .primes-list li {
+      background-color: rgba(99, 102, 241, 0.1);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', Courier, monospace;
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 2px;
+      margin-top: 16px;
+    }
+    
+    .tab {
+      padding: 8px 16px;
+      background-color: var(--gray-200);
+      border: none;
+      border-radius: 6px 6px 0 0;
+      cursor: pointer;
+    }
+    
+    .tab.active {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    @media screen and (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      
+      .input-group {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      
+      label {
+        margin-bottom: 8px;
+      }
+      
+      input[type="number"],
+      input[type="text"] {
+        width: 100%;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .history-table {
+        font-size: 0.9rem;
+      }
+      
+      .history-table th,
+      .history-table td {
+        padding: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Prime Number Explorer</h1>
+    
+    <div class="section">
+      <h2>1. Generate or Enter a Prime Number</h2>
+      
+      <div class="input-group">
+        <label for="digits">Generate a prime with digits:</label>
+        <input type="number" id="digits" min="1" max="20" value="3" />
+        <button id="generate-btn">Generate</button>
+      </div>
+      
+      <div class="input-group">
+        <label for="custom-prime">Or enter a custom number:</label>
+        <input type="text" id="custom-prime" placeholder="Enter a number" />
+        <button id="use-custom-btn">Use This Number</button>
+      </div>
+      
+      <div id="prime-alert" class="alert" style="display: none;"></div>
+      
+      <div id="selected-prime-box" class="result-box">
+        <div class="result-title">Selected Prime Number:</div>
+        <div class="result-content">
+          <span id="selected-prime" class="result-value"></span>
+        </div>
+      </div>
+      
+      <div class="input-group" style="margin-top: 24px;">
+        <label>Number of primes to find:</label>
+        <div style="flex: 1; display: flex; align-items: center;">
+          <div id="slider-container" class="slider-container">
+            <!-- Updated default value to 3 -->
+            <input type="range" id="primes-slider" class="slider" min="2" max="10" value="2" />
+            <span id="slider-value" class="slider-value">2</span>
+          </div>
+          <button id="switch-input-btn" class="switch-btn">Use Custom</button>
+        </div>
+      </div>
+      
+      <div id="custom-count-container" class="input-group" style="display: none;">
+        <label for="custom-count">Custom number of primes:</label>
+        <input type="number" id="custom-count" min="2" max="100" value="3" />
+        <button id="switch-slider-btn" class="switch-btn">Use Slider</button>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>2. Find Prime Set with Same Average</h2>
+      
+      <button id="find-pair-btn" disabled>Find Prime Set</button>
+      <div id="loader" class="loader"></div>
+      
+      <div id="pair-result-box" class="result-box">
+        <div class="result-title">Prime Set Found:</div>
+        <div class="result-content" id="primes-result-content">
+          <!-- Primes will be listed here -->
+        </div>
+        
+        <button id="toggle-proof-btn" class="toggle-proof-btn">Show Proof</button>
+        
+        <div id="proof-box" class="proof-box">
+          <div class="result-title">Mathematical Proof:</div>
+          <div id="proof-content"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="section" style="border-bottom: none;">
+      <h2>3. History of Prime Explorations</h2>
+      
+      <div class="tabs">
+        <button id="table-tab" class="tab active">Table View</button>
+        <button id="list-tab" class="tab">List View</button>
+      </div>
+      
+      <div id="table-view">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Target Prime</th>
+              <th>Discovered Primes</th>
+              <th>Count</th>
+            </tr>
+          </thead>
+          <tbody id="history-table-body">
+            <!-- History items will be listed here -->
+          </tbody>
+        </table>
+        
+        <div id="no-history" class="no-results">
+          No history yet. Find some prime sets!
+        </div>
+      </div>
+      
+      <div id="list-view" style="display: none;">
+        <div id="list-container">
+          <!-- List view items will be rendered here -->
+        </div>
+        
+        <div id="no-history-list" class="no-results">
+          No history yet. Find some prime sets!
+        </div>
+      </div>
+      
+      <div id="equation-container" class="equation-container">
+        <div id="equation" class="equation"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // DOM Elements
+    const digitsInput = document.getElementById('digits');
+    const generateBtn = document.getElementById('generate-btn');
+    const customPrimeInput = document.getElementById('custom-prime');
+    const useCustomBtn = document.getElementById('use-custom-btn');
+    const primeAlert = document.getElementById('prime-alert');
+    const selectedPrimeBox = document.getElementById('selected-prime-box');
+    const selectedPrimeEl = document.getElementById('selected-prime');
+    const findPairBtn = document.getElementById('find-pair-btn');
+    const loader = document.getElementById('loader');
+    const pairResultBox = document.getElementById('pair-result-box');
+    const primesResultContent = document.getElementById('primes-result-content');
+    const toggleProofBtn = document.getElementById('toggle-proof-btn');
+    const proofBox = document.getElementById('proof-box');
+    const proofContentEl = document.getElementById('proof-content');
+    const historyTableBody = document.getElementById('history-table-body');
+    const noHistoryEl = document.getElementById('no-history');
+    const noHistoryListEl = document.getElementById('no-history-list');
+    const equationContainer = document.getElementById('equation-container');
+    const equationEl = document.getElementById('equation');
+    const primesSlider = document.getElementById('primes-slider');
+    const sliderValue = document.getElementById('slider-value');
+    const switchInputBtn = document.getElementById('switch-input-btn');
+    const customCountContainer = document.getElementById('custom-count-container');
+    const sliderContainer = document.getElementById('slider-container').parentElement;
+    const customCount = document.getElementById('custom-count');
+    const switchSliderBtn = document.getElementById('switch-slider-btn');
+    const tableTab = document.getElementById('table-tab');
+    const listTab = document.getElementById('list-tab');
+    const tableView = document.getElementById('table-view');
+    const listView = document.getElementById('list-view');
+    const listContainer = document.getElementById('list-container');
+    
+    // Store the current prime
+    let currentPrime = null;
+    
+    // Store history of explorations
+    let history = [];
+    
+    // Function to check if a number is prime
+    function isPrime(num) {
+      if (num <= 1) return false;
+      if (num <= 3) return true;
+      if (num % 2 === 0 || num % 3 === 0) return false;
+      
+      const limit = Math.floor(Math.sqrt(num));
+      for (let i = 5; i <= limit; i += 6) {
+        if (num % i === 0 || num % (i + 2) === 0) return false;
+      }
+      
+      return true;
+    }
+    
+    // Function to find the closest prime number
+    function findClosestPrime(num) {
+      if (isPrime(num)) return num;
+      
+      let lower = num - 1;
+      let upper = num + 1;
+      
+      while (true) {
+        if (isPrime(lower)) return lower;
+        if (isPrime(upper)) return upper;
+        lower--;
+        upper++;
+      }
+    }
+    
+    // Function to generate a random prime with n digits
+    function generateRandomPrime(digits) {
+      const min = Math.pow(10, digits - 1);
+      const max = Math.pow(10, digits) - 1;
+      
+      let num = Math.floor(Math.random() * (max - min + 1)) + min;
+      if (num > 2 && num % 2 === 0) num++;
+      
+      while (!isPrime(num)) {
+        num += 2;
+        if (num > max) {
+          num = min;
+          if (num % 2 === 0) num++;
+        }
+      }
+      
+      return num;
+    }
+    
+    // Function to find a set of primes with the given average
+    function findPrimeSetWithAverage(avg, count) {
+      return new Promise((resolve) => {
+        const targetSum = count * avg;
+        setTimeout(() => {
+          const result = findPrimeSet([], 0, count, targetSum, avg);
+          if (result) {
+            resolve(result);
+          } else {
+            resolve(null);
+          }
+        }, 200);
+      });
+    }
+    
+    // Recursive function to find a set of 'count' primes that sum to 'targetSum'
+    function findPrimeSet(currentSet, currentSum, remainingCount, targetSum, avg) {
+      if (remainingCount === 1) {
+        const lastPrime = targetSum - currentSum;
+        if (lastPrime > 1 && isPrime(lastPrime)) {
+          return [...currentSet, lastPrime];
+        }
+        return null;
+      }
+      
+      const startOffset = currentSet.length > 0 ? 1 : Math.floor(avg / 10);
+      const maxOffset = Math.ceil(avg / 2);
+      
+      for (let offset = startOffset; offset < maxOffset; offset++) {
+        const candidates = [avg - offset, avg + offset];
+        for (const candidate of candidates) {
+          if (candidate > 1 && isPrime(candidate)) {
+            if (currentSum + candidate <= targetSum) {
+              const result = findPrimeSet(
+                [...currentSet, candidate],
+                currentSum + candidate,
+                remainingCount - 1,
+                targetSum,
+                avg
+              );
+              if (result) return result;
+            }
+          }
+        }
+      }
+      
+      return null;
+    }
+    
+    // Function to display an alert message
+    function showAlert(message, type) {
+      primeAlert.textContent = message;
+      primeAlert.className = `alert alert-${type}`;
+      primeAlert.style.display = 'block';
+    }
+    
+    // Function to hide the alert message
+    function hideAlert() {
+      primeAlert.style.display = 'none';
+    }
+    
+    // Function to set the current prime and update UI
+    function setCurrentPrime(prime) {
+      currentPrime = prime;
+      selectedPrimeEl.textContent = prime;
+      selectedPrimeBox.style.display = 'block';
+      findPairBtn.disabled = false;
+      pairResultBox.style.display = 'none';
+      proofBox.style.display = 'none';
+    }
+    
+    // Function to generate the proof content
+    function generateProof(primes, avg) {
+      const sum = primes.reduce((a, b) => a + b, 0);
+      const expectedSum = primes.length * avg;
+      const avgCalculated = sum / primes.length;
+      
+      return `
+        <p>To prove that the average of ${primes.join(', ')} is ${avg}, we need to show:</p>
+        <p>(${primes.join(' + ')}) / ${primes.length} = ${avg}</p>
+        <p>Left side: (${primes.join(' + ')}) = ${sum}, so ${sum} ÷ ${primes.length} = ${avgCalculated}</p>
+        <p>Right side: ${avg}</p>
+        <p>Since ${avgCalculated} = ${avg}, the average is correct.</p>
+      `;
+    }
+    
+    // Function to add a new history item
+    function addToHistory(targetPrime, primes) {
+      const historyItem = {
+        id: Date.now(),
+        targetPrime,
+        primes,
+        timestamp: new Date()
+      };
+      history.unshift(historyItem);
+      updateHistoryDisplay();
+    }
+    
+    // Function to update the history table
+    function updateHistoryDisplay() {
+      if (history.length === 0) {
+        noHistoryEl.style.display = 'block';
+        noHistoryListEl.style.display = 'block';
+      } else {
+        noHistoryEl.style.display = 'none';
+        noHistoryListEl.style.display = 'none';
+        
+        historyTableBody.innerHTML = '';
+        history.forEach((item) => {
+          const row = document.createElement('tr');
+          row.dataset.id = item.id;
+          
+          const targetCell = document.createElement('td');
+          targetCell.textContent = item.targetPrime;
+          
+          const primesCell = document.createElement('td');
+          const primesList = document.createElement('ul');
+          primesList.className = 'primes-list';
+          item.primes.forEach((prime) => {
+            const primeItem = document.createElement('li');
+            primeItem.textContent = prime;
+            primesList.appendChild(primeItem);
+          });
+          primesCell.appendChild(primesList);
+          
+          const countCell = document.createElement('td');
+          countCell.textContent = item.primes.length;
+          
+          row.appendChild(targetCell);
+          row.appendChild(primesCell);
+          row.appendChild(countCell);
+          
+          row.addEventListener('click', () => {
+            showEquation(item.targetPrime, item.primes);
+            document.querySelectorAll('.history-table tbody tr').forEach((r) => {
+              r.classList.remove('selected');
+            });
+            row.classList.add('selected');
+          });
+          
+          historyTableBody.appendChild(row);
+        });
+        updateListView();
+      }
+    }
+    
+    // Function to update the list view
+    function updateListView() {
+      listContainer.innerHTML = '';
+      if (history.length === 0) return;
+      
+      history.forEach((item) => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'result-box';
+        itemDiv.style.display = 'block';
+        itemDiv.style.marginBottom = '16px';
+        itemDiv.dataset.id = item.id;
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'result-title';
+        titleDiv.textContent = `Target Prime: ${item.targetPrime}`;
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'result-content';
+        
+        const primesList = document.createElement('div');
+        primesList.innerHTML = `<strong>Primes (${item.primes.length}):</strong> ${item.primes.join(', ')}`;
+        
+        const timeDiv = document.createElement('div');
+        timeDiv.style.fontSize = '0.9rem';
+        timeDiv.style.color = 'var(--gray-800)';
+        timeDiv.textContent = `Discovered: ${item.timestamp.toLocaleString()}`;
+        
+        contentDiv.appendChild(primesList);
+        contentDiv.appendChild(timeDiv);
+        
+        const showBtn = document.createElement('button');
+        showBtn.className = 'toggle-proof-btn';
+        showBtn.textContent = 'Show Equation';
+        showBtn.addEventListener('click', () => {
+          showEquation(item.targetPrime, item.primes);
+          document.querySelectorAll('#list-container .result-box').forEach((r) => {
+            r.classList.remove('selected');
+          });
+          itemDiv.classList.add('selected');
+        });
+        
+        itemDiv.appendChild(titleDiv);
+        itemDiv.appendChild(contentDiv);
+        itemDiv.appendChild(showBtn);
+        
+        listContainer.appendChild(itemDiv);
+      });
+    }
+    
+    // Function to show the animated equation
+    function showEquation(targetPrime, primes) {
+      equationContainer.classList.remove('visible');
+      equationEl.classList.remove('visible');
+      
+      const equationHTML = `
+        <div style="font-size: 1.5rem; margin-bottom: 16px;">
+          (${primes.join(' + ')}) ÷ ${primes.length} = ${targetPrime}
+        </div>
+        <div style="color: var(--gray-800);">
+          ${primes.reduce((a, b) => a + b, 0)} ÷ ${primes.length} = ${targetPrime}
+        </div>
+      `;
+      equationEl.innerHTML = equationHTML;
+      
+      setTimeout(() => {
+        equationContainer.classList.add('visible');
+        setTimeout(() => {
+          equationEl.classList.add('visible');
+        }, 300);
+      }, 100);
+    }
+    
+    // Event listeners
+    generateBtn.addEventListener('click', () => {
+      hideAlert();
+      const digits = parseInt(digitsInput.value);
+      if (isNaN(digits) || digits < 1 || digits > 20) {
+        showAlert('Please enter a valid number of digits (1-20).', 'error');
+        return;
+      }
+      const prime = generateRandomPrime(digits);
+      setCurrentPrime(prime);
+      customPrimeInput.value = '';
+      showAlert(`Generated a ${digits}-digit prime number.`, 'success');
+    });
+    
+    useCustomBtn.addEventListener('click', () => {
+      hideAlert();
+      let num = customPrimeInput.value.trim();
+      if (!num || !/^\d+$/.test(num)) {
+        showAlert('Please enter a valid positive integer.', 'error');
+        return;
+      }
+      num = parseInt(num, 10);
+      if (isPrime(num)) {
+        setCurrentPrime(num);
+        showAlert(`${num} is a prime number.`, 'success');
+      } else {
+        const closestPrime = findClosestPrime(num);
+        setCurrentPrime(closestPrime);
+        showAlert(`${num} is not prime. Using closest prime ${closestPrime} instead.`, 'warning');
+      }
+    });
+    
+    primesSlider.addEventListener('input', () => {
+      sliderValue.textContent = primesSlider.value;
+    });
+    
+    switchInputBtn.addEventListener('click', () => {
+      sliderContainer.style.display = 'none';
+      customCountContainer.style.display = 'flex';
+    });
+    
+    switchSliderBtn.addEventListener('click', () => {
+      customCountContainer.style.display = 'none';
+      sliderContainer.style.display = 'flex';
+    });
+    
+    findPairBtn.addEventListener('click', async () => {
+      hideAlert();
+      if (!currentPrime) {
+        showAlert('Please generate or select a prime first.', 'error');
+        return;
+      }
+      
+      let count;
+      if (customCountContainer.style.display === 'none' || customCountContainer.style.display === '') {
+        count = parseInt(primesSlider.value);
+      } else {
+        count = parseInt(customCount.value);
+      }
+      if (isNaN(count) || count < 2) {
+        showAlert('Please select a valid count of primes (at least 2).', 'error');
+        return;
+      }
+      
+      loader.style.display = 'block';
+      findPairBtn.disabled = true;
+      
+      const primeSet = await findPrimeSetWithAverage(currentPrime, count);
+      loader.style.display = 'none';
+      findPairBtn.disabled = false;
+      
+      if (primeSet) {
+        primesResultContent.innerHTML = `<strong>${primeSet.join(', ')}</strong>`;
+        pairResultBox.style.display = 'block';
+        proofContentEl.innerHTML = generateProof(primeSet, currentPrime);
+        addToHistory(currentPrime, primeSet);
+      } else {
+        showAlert('Could not find a set of primes with the given average and count. Try different parameters.', 'error');
+      }
+    });
+    
+    toggleProofBtn.addEventListener('click', () => {
+      if (proofBox.style.display === 'none' || proofBox.style.display === '') {
+        proofBox.style.display = 'block';
+        toggleProofBtn.textContent = 'Hide Proof';
+      } else {
+        proofBox.style.display = 'none';
+        toggleProofBtn.textContent = 'Show Proof';
+      }
+    });
+    
+    tableTab.addEventListener('click', () => {
+      tableTab.classList.add('active');
+      listTab.classList.remove('active');
+      tableView.style.display = 'block';
+      listView.style.display = 'none';
+    });
+    
+    listTab.addEventListener('click', () => {
+      listTab.classList.add('active');
+      tableTab.classList.remove('active');
+      listView.style.display = 'block';
+      tableView.style.display = 'none';
+    });
+  </script>
+</body>
+</html>

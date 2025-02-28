@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Draw & Find Primes</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f5f5f5;
+      padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #333;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .control-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    button {
+      padding: 8px 15px;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #3a7bc8;
+    }
+    
+    button:active {
+      background-color: #2c65a7;
+    }
+    
+    button.active {
+      background-color: #2c65a7;
+      font-weight: bold;
+    }
+    
+    button.submit-btn {
+      background-color: #4caf50;
+    }
+    
+    button.submit-btn:hover {
+      background-color: #3d8b40;
+    }
+    
+    .color-picker {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    input[type="color"] {
+      border: none;
+      width: 150%;
+      height: 150%;
+      margin-top: -25%;
+      margin-left: -25%;
+      cursor: pointer;
+    }
+    
+    .drawing-area {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    canvas {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: white;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      cursor: crosshair;
+    }
+    
+    .settings-icon {
+      cursor: pointer;
+      font-size: 24px;
+      margin-left: 15px;
+      color: #555;
+    }
+    
+    .settings-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .settings-content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .settings-content h2 {
+      margin-bottom: 15px;
+    }
+    
+    .settings-group {
+      margin-bottom: 15px;
+    }
+    
+    .settings-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .settings-group input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .settings-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    .results-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 4px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      margin-top: 20px;
+    }
+    
+    .results-container h2 {
+      margin-bottom: 15px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    
+    .result-item {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px dashed #eee;
+    }
+    
+    .result-item:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Draw & Find Primes</h1>
+    <div class="control-group">
+      <button class="submit-btn" id="submitBtn">Analyze</button>
+      <div class="settings-icon" id="settingsIcon">⚙️</div>
+    </div>
+  </header>
+  
+  <div class="controls">
+    <div class="control-group">
+      <button id="penBtn" class="active">Pen</button>
+      <button id="eraserBtn">Eraser</button>
+    </div>
+    <div class="control-group">
+      <div class="color-picker">
+        <input type="color" id="colorPicker" value="#000000">
+      </div>
+    </div>
+    <div class="control-group">
+      <button id="undoBtn">Undo</button>
+      <button id="redoBtn">Redo</button>
+      <button id="clearBtn">Clear All</button>
+    </div>
+  </div>
+  
+  <div class="drawing-area">
+    <canvas id="canvas" width="800" height="300"></canvas>
+  </div>
+  
+  <div class="results-container hidden" id="resultsContainer">
+    <h2>Prime Number Analysis</h2>
+    <div id="resultsContent"></div>
+  </div>
+  
+  <div class="settings-modal" id="settingsModal">
+    <div class="settings-content">
+      <h2>Settings</h2>
+      <div class="settings-group">
+        <label for="primeCountInput">Number of Prime Sets to Find:</label>
+        <input type="number" id="primeCountInput" min="1" max="10" value="3">
+      </div>
+      <div class="settings-group">
+        <label for="numPrimesInput">Number of primes to average:</label>
+        <input type="number" id="numPrimesInput" min="2" value="2">
+      </div>
+      <div class="settings-actions">
+        <button id="cancelSettingsBtn">Cancel</button>
+        <button id="saveSettingsBtn">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/4.1.1/tesseract.min.js"></script>
+  <script>
+    // Canvas setup
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Settings
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let currentColor = '#000000';
+    let currentTool = 'pen';
+    let brushSize = 3;
+    let eraserSize = 20;
+    let history = [];
+    let redoStack = [];
+    let maxHistorySize = 20;
+    let primePairsToFind = 3; // number of prime sets to display
+    let numPrimesToAverage = 2; // number of primes per set (default 2)
+    
+    // DOM elements
+    const penBtn = document.getElementById('penBtn');
+    const eraserBtn = document.getElementById('eraserBtn');
+    const colorPicker = document.getElementById('colorPicker');
+    const undoBtn = document.getElementById('undoBtn');
+    const redoBtn = document.getElementById('redoBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const resultsContent = document.getElementById('resultsContent');
+    const settingsIcon = document.getElementById('settingsIcon');
+    const settingsModal = document.getElementById('settingsModal');
+    const primeCountInput = document.getElementById('primeCountInput');
+    const numPrimesInput = document.getElementById('numPrimesInput');
+    const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+    const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+    
+    // Initialize canvas
+    initCanvas();
+    
+    // Save initial state
+    saveState();
+    
+    // Event listeners
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    
+    // Touch support
+    canvas.addEventListener('touchstart', handleTouchStart);
+    canvas.addEventListener('touchmove', handleTouchMove);
+    canvas.addEventListener('touchend', stopDrawing);
+    
+    // Control buttons
+    penBtn.addEventListener('click', () => setTool('pen'));
+    eraserBtn.addEventListener('click', () => setTool('eraser'));
+    colorPicker.addEventListener('input', (e) => setColor(e.target.value));
+    undoBtn.addEventListener('click', undo);
+    redoBtn.addEventListener('click', redo);
+    clearBtn.addEventListener('click', clearCanvas);
+    submitBtn.addEventListener('click', analyzeDrawing);
+    
+    // Settings
+    settingsIcon.addEventListener('click', openSettings);
+    saveSettingsBtn.addEventListener('click', saveSettings);
+    cancelSettingsBtn.addEventListener('click', closeSettings);
+    
+    // Functions
+    function initCanvas() {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+    }
+    
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX || e.touches[0].clientX) - rect.left;
+      const y = (e.clientY || e.touches[0].clientY) - rect.top;
+      [lastX, lastY] = [x, y];
+      
+      ctx.beginPath();
+      if (currentTool === 'pen') {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = brushSize;
+        ctx.arc(lastX, lastY, brushSize/2, 0, Math.PI * 2);
+        ctx.fillStyle = currentColor;
+        ctx.fill();
+      } else {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = eraserSize;
+        ctx.arc(lastX, lastY, eraserSize/2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    
+    function draw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.clientX || e.touches[0].clientX) - rect.left;
+      const y = (e.clientY || e.touches[0].clientY) - rect.top;
+      
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      if (currentTool === 'pen') {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = brushSize;
+      } else {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.lineWidth = eraserSize;
+      }
+      ctx.stroke();
+      [lastX, lastY] = [x, y];
+    }
+    
+    function stopDrawing() {
+      if (isDrawing) {
+        isDrawing = false;
+        saveState();
+      }
+    }
+    
+    function setTool(tool) {
+      currentTool = tool;
+      penBtn.classList.toggle('active', tool === 'pen');
+      eraserBtn.classList.toggle('active', tool === 'eraser');
+    }
+    
+    function setColor(color) {
+      currentColor = color;
+    }
+    
+    function saveState() {
+      if (history.length >= maxHistorySize) {
+        history.shift();
+      }
+      history.push(canvas.toDataURL());
+      redoStack = [];
+    }
+    
+    function undo() {
+      if (history.length > 1) {
+        redoStack.push(history.pop());
+        loadState(history[history.length - 1]);
+      }
+    }
+    
+    function redo() {
+      if (redoStack.length > 0) {
+        const state = redoStack.pop();
+        history.push(state);
+        loadState(state);
+      }
+    }
+    
+    function loadState(state) {
+      const img = new Image();
+      img.src = state;
+      img.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+      };
+    }
+    
+    function clearCanvas() {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      saveState();
+      resultsContainer.classList.add('hidden');
+    }
+    
+    function handleTouchStart(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent("mousedown", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    }
+    
+    function handleTouchMove(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const mouseEvent = new MouseEvent("mousemove", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+      canvas.dispatchEvent(mouseEvent);
+    }
+    
+    function openSettings() {
+      primeCountInput.value = primePairsToFind;
+      numPrimesInput.value = numPrimesToAverage;
+      settingsModal.style.display = 'flex';
+    }
+    
+    function closeSettings() {
+      settingsModal.style.display = 'none';
+    }
+    
+    function saveSettings() {
+      const countVal = parseInt(primeCountInput.value);
+      if (!isNaN(countVal) && countVal >= 1 && countVal <= 10) {
+        primePairsToFind = countVal;
+      }
+      const numVal = parseInt(numPrimesInput.value);
+      if (!isNaN(numVal) && numVal >= 2) {
+        numPrimesToAverage = numVal;
+      }
+      closeSettings();
+    }
+    
+    // Prime number functions
+    function isPrime(num) {
+      if (num < 2) return false;
+      if (num === 2) return true;
+      if (num % 2 === 0) return false;
+      const sqrt = Math.sqrt(num);
+      for (let i = 3; i <= sqrt; i += 2) {
+        if (num % i === 0) return false;
+      }
+      return true;
+    }
+    
+    function findNearestPrime(num) {
+      if (isPrime(num)) return num;
+      let lowerNum = num - 1;
+      let higherNum = num + 1;
+      while (true) {
+        if (isPrime(lowerNum)) return lowerNum;
+        if (isPrime(higherNum)) return higherNum;
+        lowerNum--;
+        higherNum++;
+      }
+    }
+    
+    // Helper to generate list of primes up to n
+    function getPrimesUpTo(n) {
+      let primes = [];
+      for (let i = 2; i <= n; i++) {
+        if (isPrime(i)) primes.push(i);
+      }
+      return primes;
+    }
+    
+    // Find combinations of "numPrimes" primes that sum to (prime * numPrimes)
+    function findPrimeSets(prime, count, numPrimes) {
+      const targetSum = prime * numPrimes;
+      const primesList = getPrimesUpTo(targetSum);
+      const results = [];
+      
+      function backtrack(start, combo, currentSum) {
+        if (combo.length === numPrimes) {
+          if (currentSum === targetSum) {
+            results.push([...combo]);
+          }
+          return;
+        }
+        for (let i = start; i < primesList.length; i++) {
+          const candidate = primesList[i];
+          if (currentSum + candidate > targetSum) break;
+          combo.push(candidate);
+          backtrack(i + 1, combo, currentSum + candidate);
+          combo.pop();
+          if (results.length >= count) return;
+        }
+      }
+      
+      backtrack(0, [], 0);
+      return results.slice(0, count);
+    }
+    
+    // OCR and analysis function with digit whitelist
+    function analyzeDrawing() {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Analyzing...";
+      
+      const dataUrl = canvas.toDataURL('image/png');
+      
+      // Only recognize digits by whitelisting numeric characters
+      Tesseract.recognize(
+        dataUrl,
+        'eng',
+        { logger: m => console.log(m), tessedit_char_whitelist: '0123456789' }
+      ).then(({ data: { text } }) => {
+        // Extract numbers from OCR result
+        const matches = text.match(/\d+/g);
+        
+        if (!matches || matches.length === 0) {
+          displayResults("No numbers detected. Please write a number clearly and try again.");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Analyze";
+          return;
+        }
+        
+        // Use the first detected number
+        const number = parseInt(matches[0]);
+        const prime = findNearestPrime(number);
+        const sets = findPrimeSets(prime, primePairsToFind, numPrimesToAverage);
+        
+        let resultsHTML = '';
+        if (number === prime) {
+          resultsHTML += `<div class="result-item">Detected number: <strong>${number}</strong> is a prime number.</div>`;
+        } else {
+          resultsHTML += `<div class="result-item">Detected number: <strong>${number}</strong> is not a prime number. Nearest prime: <strong>${prime}</strong></div>`;
+        }
+        
+        if (sets.length > 0) {
+          resultsHTML += `<div class="result-item">
+            <p>Prime sets of ${numPrimesToAverage} that average to ${prime}:</p>
+            <ul style="margin-top: 10px; margin-left: 20px;">`;
+          
+          sets.forEach(set => {
+            resultsHTML += `<li>(${set.join(', ')}) → Average: (${set.join(' + ')}) / ${numPrimesToAverage} = ${prime}</li>`;
+          });
+          
+          resultsHTML += `</ul></div>`;
+        } else {
+          resultsHTML += `<div class="result-item">No prime sets found that average to ${prime}.</div>`;
+        }
+        
+        displayResults(resultsHTML);
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Analyze";
+      }).catch(err => {
+        console.error(err);
+        displayResults("Error analyzing the drawing. Please try again.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Analyze";
+      });
+    }
+    
+    function displayResults(content) {
+      resultsContent.innerHTML = content;
+      resultsContainer.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
