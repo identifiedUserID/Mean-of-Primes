@@ -2,11 +2,11 @@
 
 ## Abstract
 
-This paper introduces a novel conjecture in the field of number theory, suggesting that any prime number greater than 3 can be represented as the arithmetic mean of at least one pair of distinct prime numbers. The conjecture extends the exploration of prime number relationships, offering a unique perspective on their distribution and connectivity. Initial examples provided across various prime magnitudes support the conjecture, with a thorough examination included for both smaller and significantly larger primes.
+In this paper we explore a new, undiscovered concept in number theory, where **any prime number greater than 3** can be represented as the arithmetic mean of at least one pair of distinct prime numbers. Our conjecture extends the existing research of prime number relationships, offering a unique perspective on their distribution and connectivity. Initial examples provided across various prime magnitudes support the conjecture, with a thorough examination included for both smaller and significantly larger primes using computer algorithms..
 
 ## Introduction
 
-Prime numbers, the building blocks of natural numbers, have been extensively studied for their inherent properties and the mysteries surrounding their distribution. Beyond classical results and conjectures such as the Goldbach Conjecture, researchers continuously seek new relationships and patterns among primes. This paper proposes a new conjecture, which posits that any prime number greater than 3 serves as the arithmetic mean of at least one pair of distinct primes. This conjecture not only adds to the rich tapestry of number theory but also encourages deeper analysis into the symmetrical properties of primes.
+Prime numbers, the building blocks of natural numbers, have been extensively studied for their inherent properties and the mysteries surrounding their distribution. Beyond classical results and conjectures such as the Goldbach Conjecture, researchers continuously seek new relationships and patterns among primes. Our paper proposes a new conjecture, which posits that any prime number greater than 3 serves as the arithmetic mean of at least one pair of distinct primes.
 
 # Conjecture
 
